@@ -3,45 +3,46 @@ var playerKillList = [ {name: "", killCount: 0} ];
 function kills(o) {
   var playerName = o.player.getName();
   var heldItem = o.player.getHeldItem();
+  var upPerNum = 5; // 击杀数增加多少触发
 
   if (heldItem.getDisplayName() === "圣剑") {
     var existingPlayer = findPlayer(playerKillList, playerName);
 
-    if (existingPlayer) {
+    // 该玩家不是第一次使用，直接将数组内对应玩家的对象的计数增加
+    if (existingPlayer != null) {
       existingPlayer.killCount++;
-      var lore = [
-        "一把虚假的圣剑，杀死敌人后会发出嘲讽",
-        "似乎能够能够通过嘲讽不断成长" ,
-        "杀敌数: " + existingPlayer.killCount
-      ];
-      // heldItem.setLore(jsJSONTojavaString(lore));
-      heldItem.setLore(lore);
-      if (existingPlayer.killCount % 10 === 0) {
+      // 设置物品描述 lore
+      setItemLore(heldItem, existingPlayer.killCount);
+      // 杀敌数每增加upPerNum，就启动一次，设置伤害
+      if (existingPlayer.killCount % upPerNum === 0) {
         o.player.sendMessage("圣剑，启动！");
-        heldItem.setAttribute("generic.attackDamage", existingPlayer.killCount / 10);
+        heldItem.setAttribute("generic.attackDamage", existingPlayer.killCount / upPerNum);
       }
-    } else {
-        var newPlayer = { name: playerName, killCount: 1 };
-        playerKillList.push(newPlayer);
+    } else { // 该玩家第一次使用，击杀数设置为1，名字记录进去，武器添加描述，设置初始伤害
+      var newPlayer = { name: playerName, killCount: 1 };
+      playerKillList.push(newPlayer);
+      setItemLore(heldItem, 1);
+      heldItem.setAttribute("generic.attackDamage", 1);
     }
   }
 }
 
+// 设置物品的描述(lore)
+function setItemLore(item, killCount) {
+  var lore = [
+    "一把虚假的圣剑，杀死敌人后会发出嘲讽",
+    "似乎能够能够通过嘲讽不断成长" ,
+    "杀敌数: " + killCount
+  ];
+  item.setLore(lore);
+}
+
+// 查找对象数组内是否已有该玩家名
 function findPlayer(array, playerName) {
-    for (var i = 0; i < array.length; i++) {
-        if (array[i].name === playerName) {
-            return array[i];
-        }
+  for (var i = 0; i < array.length; i++) {
+    if (array[i].name === playerName) {
+      return array[i];
     }
-    return null;
-}
-
-function jsJSONTojavaString(JSONstring) {
-  // 创建一个与 JSON 字符串数组长度相同的 Java 字符串数组
-  var javaStringArray = Java.to(new Array(JSONstring.length), "java.lang.String[]");
-  // 将 JavaScript 字符串数组的元素逐个复制到 Java 字符串数组中
-  for (var i = 0; i < JSONstring.length; i++) {
-      javaStringArray[i] = JSONstring[i];
   }
-  return javaStringArray;
+  return null;
 }
