@@ -22,7 +22,7 @@ function kills(o) {
       var newPlayer = { name: playerName, killCount: 1 };
       playerKillList.push(newPlayer);
       setItemLore(heldItem, 1);
-      heldItem.setAttribute("generic.attackDamage", 1);
+      heldItem.setAttribute("generic.attackDamage", 0);
     }
   }
 }
